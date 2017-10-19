@@ -12,7 +12,7 @@ data TermI = SymI Int
            | AppI TermI TermI
            deriving (Eq,Show,Read)
 
---  getIndex transforms a lambda term into it's de Bruijn representation
+-- getIndex returns index of variable from grammar
 getIndex :: (Eq a) => a -> [a] -> Int
 getIndex a xs = getIndex' 0 (reverse xs)
   where
@@ -20,6 +20,7 @@ getIndex a xs = getIndex' 0 (reverse xs)
     getIndex' i (x:xs) | a == x    = i
                        | otherwise = getIndex' (i + 1) xs
 
+--  toTermI transforms a lambda term into it's de Bruijn representation
 toTermI :: TermS -> TermI
 toTermI t = toTermI' [] t
   where
