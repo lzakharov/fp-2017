@@ -63,6 +63,10 @@ data TermP = TermP TermS
            | Not TermP
            | And TermP TermP
            | Or TermP TermP
+           -- Pair
+           | Pair TermP TermP
+           | Fst TermP
+           | Snd TermP
 
 sym x = SymS (Symbol x)
 lam x t = LamS (Symbol x) t
@@ -81,13 +85,23 @@ and_ = lam "x" (lam "y" (app (app (sym "x") (sym "y")) fls))
 -- λx. λy. x tru y
 or_ = lam "x" (lam "y" (app (app (sym "x") tru) (sym "y")))
 
+-- λf. λs. λb. b f s
+pair = lam "f" (lam "s" (lam "b" (app (app (sym "b") (sym "f")) (sym "s"))))
+-- λp. p tru
+fst_ = lam "p" (app (sym "p") tru)
+-- λp. p fls
+snd_ = lam "p" (app (sym "p") fls)
+
 toTermS :: TermP -> TermS
 toTermS (Boolean True) = tru
 toTermS (Boolean False) = fls
-toTermS (Iff b x y) = AppS (AppS (AppS (iff) (toTermS b)) (toTermS x)) (toTermS y)
-toTermS (Not x) = AppS (not_) (toTermS x)
-toTermS (And x y) = AppS (AppS (and_) (toTermS x)) (toTermS y)
-toTermS (Or x y) = AppS (AppS (or_) (toTermS x)) (toTermS y)
+toTermS (Iff b x y) = app (app (app iff (toTermS b)) (toTermS x)) (toTermS y)
+toTermS (Not x) = app not_ (toTermS x)
+toTermS (And x y) = app (app and_ (toTermS x)) (toTermS y)
+toTermS (Or x y) = app (app or_ (toTermS x)) (toTermS y)
+toTermS (Pair x y) = app (app pair (toTermS x)) (toTermS y)
+toTermS (Fst p) = app fst_ (toTermS p)
+toTermS (Snd p) = app snd_ (toTermS p)
 
 printS :: TermS -> String
 printS t | t == tru = "tru"
