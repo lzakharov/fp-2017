@@ -64,19 +64,26 @@ data TermP = TermP TermS
            | And TermP TermP
            | Or TermP TermP
 
-toTermS :: TermP -> TermS
 -- λt.λf.t
-toTermS (Boolean True) = LamS (Symbol "t") (LamS (Symbol "f") (SymS (Symbol "t")))
+tru = LamS (Symbol "t") (LamS (Symbol "f") (SymS (Symbol "t")))
 -- λt.λf.f
-toTermS (Boolean False) = LamS (Symbol "t") (LamS (Symbol "f") (SymS (Symbol "f")))
--- (λb. λt. λf. b t f) b x y
-toTermS (Iff b x y) = AppS (AppS (LamS (Symbol "b") (LamS (Symbol "t") (LamS (Symbol "f") (AppS (AppS (toTermS b) (SymS (Symbol "t"))) (SymS (Symbol "f")))))) (toTermS x)) (toTermS y)
--- (λx. x fls tru) x
-toTermS (Not x) = AppS (LamS (Symbol "x") (AppS (AppS (SymS (Symbol "x")) (toTermS (Boolean False))) (toTermS (Boolean True)))) (toTermS x)
--- (λx. λy. x y fls) x y
-toTermS (And x y) = AppS (AppS (LamS (Symbol "x") (LamS (Symbol "y") (AppS (AppS (SymS (Symbol "x")) (SymS (Symbol "y"))) (toTermS (Boolean False))))) (toTermS x)) (toTermS y)
--- (λx. λy. x tru y) x y
-toTermS (Or x y) = AppS (AppS (LamS (Symbol "x") (LamS (Symbol "y") (AppS (AppS (SymS (Symbol "x")) (toTermS (Boolean True))) (SymS (Symbol "y"))))) (toTermS x)) (toTermS y)
+fls = LamS (Symbol "t") (LamS (Symbol "f") (SymS (Symbol "f")))
+-- λb. λt. λf. b t f
+iff = LamS (Symbol "b") (LamS (Symbol "t") (LamS (Symbol "f") (AppS (AppS (SymS (Symbol "b")) (SymS (Symbol "t"))) (SymS (Symbol "f")))))
+-- λx. x fls tru
+not_ = LamS (Symbol "x") (AppS (AppS (SymS (Symbol "x")) fls) (tru))
+-- λx. λy. x y fls
+and_ = LamS (Symbol "x") (LamS (Symbol "y") (AppS (AppS (SymS (Symbol "x")) (SymS (Symbol "y"))) (fls)))
+-- λx. λy. x tru y
+or_ = LamS (Symbol "x") (LamS (Symbol "y") (AppS (AppS (SymS (Symbol "x")) (tru)) (SymS (Symbol "y"))))
+
+toTermS :: TermP -> TermS
+toTermS (Boolean True) = tru
+toTermS (Boolean False) = fls
+toTermS (Iff b x y) = AppS (AppS (AppS (iff) (toTermS b)) (toTermS x)) (toTermS y)
+toTermS (Not x) = AppS (not_) (toTermS x)
+toTermS (And x y) = AppS (AppS (and_) (toTermS x)) (toTermS y)
+toTermS (Or x y) = AppS (AppS (or_) (toTermS x)) (toTermS y)
 
 -- let
 sym x = SymS (Symbol x)
