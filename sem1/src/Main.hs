@@ -77,6 +77,13 @@ and_ = LamS (Symbol "x") (LamS (Symbol "y") (AppS (AppS (SymS (Symbol "x")) (Sym
 -- λx. λy. x tru y
 or_ = LamS (Symbol "x") (LamS (Symbol "y") (AppS (AppS (SymS (Symbol "x")) (tru)) (SymS (Symbol "y"))))
 
+printS :: TermS -> String
+printS t | t == tru = "tru"
+         | t == fls = "fls"
+printS (SymS (Symbol x)) = x
+printS (LamS (Symbol x) t) = "\955" ++ x ++ ". " ++ (printS t)
+printS (AppS t1 t2) = "(" ++ (printS t1) ++ " " ++ (printS t2) ++ ")"
+
 toTermS :: TermP -> TermS
 toTermS (Boolean True) = tru
 toTermS (Boolean False) = fls
