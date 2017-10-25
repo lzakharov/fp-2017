@@ -67,6 +67,12 @@ data TermP = TermP TermS
            | Pair TermP TermP
            | Fst TermP
            | Snd TermP
+           -- List
+           | Nil
+           | Cons TermP TermP
+           | IsNil TermP
+           | Head TermP
+           | Tail TermP
 
 sym x = SymS (Symbol x)
 lam x t = LamS (Symbol x) t
@@ -92,6 +98,17 @@ fst_ = lam "p" (app (sym "p") tru)
 -- λp. p fls
 snd_ = lam "p" (app (sym "p") fls)
 
+-- λc. λn. n
+nil = lam "c" (lam "n" (sym "n"))
+-- λh. λt. λc. λn. c h (t c n)
+cons = lam "h" (lam "t" (lam "c" (lam "n" (app (app (sym "c") (sym "h")) (app (app (sym "t") (sym "c")) (sym "n"))))))
+-- λl. l (λh. λt. fls) tru
+isnil = lam "l" (app (app (sym "l") (lam "h" (lam "t" fls))) tru)
+-- λl. l (λh. λt. h) fls
+head_ = lam "l" (app (app (sym "l") (lam "h" (lam "t" (sym "h")))) fls)
+-- λl. fst (l (λx. λp. pair (snd p) (cons x (snd p))) (pair nil nil))
+tail_ = lam "l" (app fst_ (app (app (sym "l") (lam "x" (lam "p" (app (app pair (app snd_ (sym "p"))) (app (app cons (sym "x")) (app snd_ (sym "p"))))))) (app (app pair nil) nil)))
+
 toTermS :: TermP -> TermS
 toTermS (Boolean True) = tru
 toTermS (Boolean False) = fls
@@ -102,10 +119,20 @@ toTermS (Or x y) = app (app or_ (toTermS x)) (toTermS y)
 toTermS (Pair x y) = app (app pair (toTermS x)) (toTermS y)
 toTermS (Fst p) = app fst_ (toTermS p)
 toTermS (Snd p) = app snd_ (toTermS p)
+toTermS Nil = nil
+toTermS (Cons l t) = app (app cons (toTermS l)) (toTermS t)
+toTermS (IsNil l) = app isnil (toTermS l)
+toTermS (Head l) = app head_ (toTermS l)
+toTermS (Tail l) = app tail_ (toTermS l)
 
 printS :: TermS -> String
 printS t | t == tru = "tru"
          | t == fls = "fls"
+         | t == pair = "pair"
+         | t == fst_ = "fst"
+         | t == snd_ = "snd"
+         | t == nil = "nil"
+         | t == cons = "cons"
 printS (SymS (Symbol x)) = x
 printS (LamS (Symbol x) t) = "\955" ++ x ++ ". " ++ (printS t)
 printS (AppS t1 t2) = "(" ++ (printS t1) ++ " " ++ (printS t2) ++ ")"
