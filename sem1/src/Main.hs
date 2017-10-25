@@ -64,25 +64,22 @@ data TermP = TermP TermS
            | And TermP TermP
            | Or TermP TermP
 
--- λt.λf.t
-tru = LamS (Symbol "t") (LamS (Symbol "f") (SymS (Symbol "t")))
--- λt.λf.f
-fls = LamS (Symbol "t") (LamS (Symbol "f") (SymS (Symbol "f")))
--- λb. λt. λf. b t f
-iff = LamS (Symbol "b") (LamS (Symbol "t") (LamS (Symbol "f") (AppS (AppS (SymS (Symbol "b")) (SymS (Symbol "t"))) (SymS (Symbol "f")))))
--- λx. x fls tru
-not_ = LamS (Symbol "x") (AppS (AppS (SymS (Symbol "x")) fls) (tru))
--- λx. λy. x y fls
-and_ = LamS (Symbol "x") (LamS (Symbol "y") (AppS (AppS (SymS (Symbol "x")) (SymS (Symbol "y"))) (fls)))
--- λx. λy. x tru y
-or_ = LamS (Symbol "x") (LamS (Symbol "y") (AppS (AppS (SymS (Symbol "x")) (tru)) (SymS (Symbol "y"))))
+sym x = SymS (Symbol x)
+lam x t = LamS (Symbol x) t
+app t1 t2 = AppS t1 t2
 
-printS :: TermS -> String
-printS t | t == tru = "tru"
-         | t == fls = "fls"
-printS (SymS (Symbol x)) = x
-printS (LamS (Symbol x) t) = "\955" ++ x ++ ". " ++ (printS t)
-printS (AppS t1 t2) = "(" ++ (printS t1) ++ " " ++ (printS t2) ++ ")"
+-- λt. λf. t
+tru = lam "t" (lam "f" (sym "t"))
+-- λt. λf. f
+fls = lam "t" (lam "f" (sym "f"))
+-- λb. λt. λf. b t f
+iff = lam "b" (lam "t" (lam "f" (app (app (sym "b") (sym "t")) (sym "f"))))
+-- λx. x fls tru
+not_ = lam "x" (app (app (sym "x") fls) tru)
+-- λx. λy. x y fls
+and_ = lam "x" (lam "y" (app (app (sym "x") (sym "y")) fls))
+-- λx. λy. x tru y
+or_ = lam "x" (lam "y" (app (app (sym "x") tru) (sym "y")))
 
 toTermS :: TermP -> TermS
 toTermS (Boolean True) = tru
@@ -92,10 +89,12 @@ toTermS (Not x) = AppS (not_) (toTermS x)
 toTermS (And x y) = AppS (AppS (and_) (toTermS x)) (toTermS y)
 toTermS (Or x y) = AppS (AppS (or_) (toTermS x)) (toTermS y)
 
--- let
-sym x = SymS (Symbol x)
-lam x t = LamS (Symbol x) t
-app t1 t2 = AppS t1 t2
+printS :: TermS -> String
+printS t | t == tru = "tru"
+         | t == fls = "fls"
+printS (SymS (Symbol x)) = x
+printS (LamS (Symbol x) t) = "\955" ++ x ++ ". " ++ (printS t)
+printS (AppS t1 t2) = "(" ++ (printS t1) ++ " " ++ (printS t2) ++ ")"
 
 main :: IO ()
 main = do
