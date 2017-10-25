@@ -70,7 +70,7 @@ toTermS (Boolean True) = LamS (Symbol "t") (LamS (Symbol "f") (SymS (Symbol "t")
 -- λt.λf.f
 toTermS (Boolean False) = LamS (Symbol "t") (LamS (Symbol "f") (SymS (Symbol "f")))
 -- (λb. λt. λf. b t f) b x y
-toTermS (Iff b x y) = AppS (AppS (LamS (Symbol "b") (LamS (Symbol "t") (LamS (Symbol "f") (AppS (AppS (toTermS b) (SymS (Symbol "е"))) (SymS (Symbol "f")))))) (toTermS x)) (toTermS y)
+toTermS (Iff b x y) = AppS (AppS (LamS (Symbol "b") (LamS (Symbol "t") (LamS (Symbol "f") (AppS (AppS (toTermS b) (SymS (Symbol "t"))) (SymS (Symbol "f")))))) (toTermS x)) (toTermS y)
 -- (λx. x fls tru) x
 toTermS (Not x) = AppS (LamS (Symbol "x") (AppS (AppS (SymS (Symbol "x")) (toTermS (Boolean False))) (toTermS (Boolean True)))) (toTermS x)
 -- (λx. λy. x y fls) x y
