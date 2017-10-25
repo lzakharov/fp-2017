@@ -56,6 +56,28 @@ betaI (AppI t1 t2) = let t1' = betaI t1
                                       (Just a) -> Just (AppI t1 a)
                                       otherwise -> Nothing
 
+data TermP = TermP TermS
+           -- Boolean constants and operations (and, or, not)
+           | Boolean Bool
+           | Iff TermP TermP TermP
+           | Not TermP
+           | And TermP TermP
+           | Or TermP TermP
+
+toTermS :: TermP -> TermS
+-- λt.λf.t
+toTermS (Boolean True) = LamS (Symbol "t") (LamS (Symbol "f") (SymS (Symbol "t")))
+-- λt.λf.f
+toTermS (Boolean False) = LamS (Symbol "t") (LamS (Symbol "f") (SymS (Symbol "f")))
+-- (λb. λt. λf. b t f) b x y
+toTermS (Iff b x y) = AppS (AppS (LamS (Symbol "b") (LamS (Symbol "t") (LamS (Symbol "f") (AppS (AppS (toTermS b) (SymS (Symbol "е"))) (SymS (Symbol "f")))))) (toTermS x)) (toTermS y)
+-- (λx. x fls tru) x
+toTermS (Not x) = AppS (LamS (Symbol "x") (AppS (AppS (SymS (Symbol "x")) (toTermS (Boolean False))) (toTermS (Boolean True)))) (toTermS x)
+-- (λx. λy. x y fls) x y
+toTermS (And x y) = AppS (AppS (LamS (Symbol "x") (LamS (Symbol "y") (AppS (AppS (SymS (Symbol "x")) (SymS (Symbol "y"))) (toTermS (Boolean False))))) (toTermS x)) (toTermS y)
+-- (λx. λy. x tru y) x y
+toTermS (Or x y) = AppS (AppS (LamS (Symbol "x") (LamS (Symbol "y") (AppS (AppS (SymS (Symbol "x")) (toTermS (Boolean True))) (SymS (Symbol "y"))))) (toTermS x)) (toTermS y)
+
 -- let
 sym x = SymS (Symbol x)
 lam x t = LamS (Symbol x) t
