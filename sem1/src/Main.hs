@@ -73,6 +73,7 @@ data TermP = TermP TermS
            | IsNil TermP
            | Head TermP
            | Tail TermP
+           deriving (Eq,Show,Read)
 
 sym x = SymS (Symbol x)
 lam x t = LamS (Symbol x) t
@@ -137,6 +138,10 @@ printS (SymS (Symbol x)) = x
 printS (LamS (Symbol x) t) = "\955" ++ x ++ ". " ++ (printS t)
 printS (AppS t1 t2) = "(" ++ (printS t1) ++ " " ++ (printS t2) ++ ")"
 
+solve :: TermP -> Either (Maybe TermI) (Maybe TermS)
+solve = Left . betaI . toTermI . toTermS
+
 main :: IO ()
 main = do
-  putStrLn "Семестровая работа №1"
+  s <- read <$> getLine
+  print $ solve s
