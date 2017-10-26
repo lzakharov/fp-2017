@@ -111,6 +111,7 @@ head_ = lam "l" (app (app (sym "l") (lam "h" (lam "t" (sym "h")))) fls)
 tail_ = lam "l" (app fst_ (app (app (sym "l") (lam "x" (lam "p" (app (app pair (app snd_ (sym "p"))) (app (app cons (sym "x")) (app snd_ (sym "p"))))))) (app (app pair nil) nil)))
 
 toTermS :: TermP -> TermS
+toTermS (TermP t) = t
 toTermS (Boolean True) = tru
 toTermS (Boolean False) = fls
 toTermS (Iff b x y) = app (app (app iff (toTermS b)) (toTermS x)) (toTermS y)
