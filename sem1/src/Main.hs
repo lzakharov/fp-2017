@@ -139,8 +139,17 @@ printS (SymS (Symbol x)) = x
 printS (LamS (Symbol x) t) = "\955" ++ x ++ ". " ++ printS t
 printS (AppS t1 t2) = "(" ++ printS t1 ++ " " ++ printS t2 ++ ")"
 
-solve :: TermP -> Either (Maybe TermI) (Maybe TermS)
-solve = Left . betaI . toTermI . toTermS
+solve :: TermP -> Either TermI TermS
+solve = Left . full toTermI betaI . toTermS
+
+-- выполнять редукцию до конца (но не больше 10000 шагов из-за возможности зависания)
+full :: (TermS -> a) -> (a -> Maybe a) -> TermS -> a
+full a b term = lastUnf 10000 b (a term)
+  where lastUnf :: Int -> (a -> Maybe a) -> a -> a
+        lastUnf 0 _ x = x
+        lastUnf n f x = case f x of
+          Nothing -> x
+          Just y -> lastUnf (n-1) f y
 
 main :: IO ()
 main = do
