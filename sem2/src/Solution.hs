@@ -87,7 +87,8 @@ typeOf = typeOf' []
         _              -> Left "argument of operator IsNil must be a list"
       Cons t1 t2  -> case typeOf' env t2 of
         Right (List ty2) -> case typeOf' env t1 of
-          (Right ty1) | ty1 /= ty2 -> Left "first argument of operator Cons must have same type as the elements of the second argument"
+          (Right ty1) | ty2 == Base -> Right $ List ty1
+                      | ty1 /= ty2 -> Left "first argument of operator Cons must have same type as the elements of the second argument"
                       | otherwise  -> Right $ List ty1
           _ -> Left "type mismatch in first argument of operator Cons"
         _ -> Left "second argument of operator Cons must be a list"
