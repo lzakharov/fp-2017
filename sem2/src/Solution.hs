@@ -61,7 +61,7 @@ typeOf = typeOf' []
                    ty2 = typeOf' env t2
       Iff t1 t2 t3 | ty1 /= Right Bool   -> Left "guard of conditional not a boolean"
                    | ty2 /= ty3          -> Left "arms of conditional have different types"
-                   | otherwise           -> Right Bool
+                   | otherwise           -> ty2
                    where
                      ty1 = typeOf' env t1
                      ty2 = typeOf' env t2
@@ -96,5 +96,5 @@ typeOf = typeOf' []
         Right (List ty) -> Right ty
         _               -> Left "argument of operator Head must be a list"
       Tail t -> case typeOf' env t of
-        Right (List ty) -> Right ty
+        Right (List ty) -> Right $ List ty
         _               -> Left "argument of operator Tail must be a list"
